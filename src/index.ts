@@ -1,7 +1,6 @@
-import * as path from 'path';
 import * as protobuf from 'protobufjs';
 import * as _ from 'lodash';
-import grpcCaller from 'grpc-caller';
+import * as grpcCaller from 'grpc-caller';
 import {
   GraphQLSchema,
   GraphQLInputObjectType,
@@ -15,7 +14,6 @@ import {
   getGraphQlSubscriptionsFromProtoService,
 } from './service_converter';
 import { getPackageProtoDefinition } from './protobuf';
-import { access } from 'fs';
 
 export {
   getGraphqlQueriesFromProtoService,
@@ -36,13 +34,13 @@ type GraphqlInputTypes = GraphQLInputObjectType | GraphQLObjectType;
 
 export async function getGraphqlSchemaFromGrpc({
   endpoint,
-  protoFile,
+  protoFilePath,
   serviceName,
   packageName,
 }: GrpcGraphqlSchemaConfiguration): Promise<GraphQLSchema> {
   const client = grpcCaller(
     endpoint,
-    path.resolve(__dirname, protoFile),
+    protoFilePath,
     serviceName,
     null,
     {
@@ -52,7 +50,7 @@ export async function getGraphqlSchemaFromGrpc({
   );
 
   const { nested }: protobuf.INamespace =
-    await getPackageProtoDefinition(protoFile, packageName);
+    await getPackageProtoDefinition(protoFilePath, packageName);
 
   const types: GraphqlInputTypes[] = Object.keys(nested)
     .filter((key: string) => 'fields' in nested[key])

@@ -8,7 +8,7 @@ import {
 
 export interface GrpcGraphqlSchemaConfiguration {
   endpoint: string;
-  protoFile: string;
+  protoFilePath: string;
   serviceName: string;
   packageName: string;
 }
