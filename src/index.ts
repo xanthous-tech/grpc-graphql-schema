@@ -1,8 +1,12 @@
 import * as path from 'path';
 import * as protobuf from 'protobufjs';
 import * as _ from 'lodash';
-import caller from 'grpc-caller';
-import { GraphQLSchema } from 'graphql';
+import grpcCaller from 'grpc-caller';
+import {
+  GraphQLSchema,
+  GraphQLInputObjectType,
+  GraphQLObjectType,
+} from 'graphql';
 
 import { GrpcGraphqlSchemaConfiguration } from './types';
 import { getGraphqlTypeFromProtoDefinition } from './type_converter';
@@ -10,6 +14,8 @@ import {
   getGraphqlQueriesFromProtoService,
   getGraphQlSubscriptionsFromProtoService,
 } from './service_converter';
+import { getPackageProtoDefinition } from './protobuf';
+import { access } from 'fs';
 
 export {
   getGraphqlQueriesFromProtoService,
@@ -23,16 +29,18 @@ export {
 export {
   GRPC_GQL_TYPE_MAPPING,
   GrpcGraphqlSchemaConfiguration,
-  TypeDefinitionCache,
+  typeDefinitionCache,
 } from './types';
 
-export function getGraphqlSchemaFromGrpc({
+type GraphqlInputTypes = GraphQLInputObjectType | GraphQLObjectType;
+
+export async function getGraphqlSchemaFromGrpc({
   endpoint,
   protoFile,
   serviceName,
   packageName,
 }: GrpcGraphqlSchemaConfiguration): Promise<GraphQLSchema> {
-  const client = caller(
+  const client = grpcCaller(
     endpoint,
     path.resolve(__dirname, protoFile),
     serviceName,
@@ -42,64 +50,68 @@ export function getGraphqlSchemaFromGrpc({
       'grpc.max_receive_message_length': -1,
     },
   );
-  const getProtobufDefPromise = protobuf
-    .load(protoFile)
-    .then(root => root.toJSON())
-    .then((obj) => {
-      const packagePaths = packageName.split('.');
-      for (let i = 0; i < packagePaths.length; i += 2) {
-        packagePaths.splice(i, 0, 'nested');
-      }
-      return _.get(obj, packagePaths.join('.'));
-    });
 
-  return getProtobufDefPromise.then(({ nested }) => {
-    const types = Object.keys(nested)
-      .filter(key => 'fields' in nested[key])
-      .reduce((acc, key) => {
-        const definition = nested[key];
+  const { nested }: protobuf.INamespace =
+    await getPackageProtoDefinition(protoFile, packageName);
+
+  const types: GraphqlInputTypes[] = Object.keys(nested)
+    .filter((key: string) => 'fields' in nested[key])
+    .reduce(
+      (acc: GraphqlInputTypes[], key: string) => {
+        const definition: protobuf.AnyNestedObject = nested[key];
 
         // skip empty
         if (key.startsWith('Empty')) {
           return acc;
         }
 
-        return acc.concat([
-          getGraphqlTypeFromProtoDefinition({
-            definition,
-            typeName: key,
-          }),
-        ]);
-      }, []);
+        if ((<protobuf.IType>definition).fields) {
+          return acc.concat([
+            getGraphqlTypeFromProtoDefinition({
+              definition: (<protobuf.IType>definition),
+              typeName: key,
+            }),
+          ]);
+        }
 
-    const query = Object.keys(nested)
-      .filter(key => 'methods' in nested[key] && key === serviceName)
-      .reduce((__, key) => {
+        return acc;
+      },
+      [],
+    );
+
+  const query = Object.keys(nested)
+    .filter((key: string) => 'methods' in nested[key] && key === serviceName)
+    .reduce(
+      (__: any, key: string): GraphQLObjectType | null => {
         const definition = nested[key];
 
         return getGraphqlQueriesFromProtoService({
+          client,
           definition,
           serviceName: key,
-          client,
         });
-      }, null);
+      },
+      null,
+    );
 
-    const subscription = Object.keys(nested)
-      .filter(key => 'methods' in nested[key] && key === serviceName)
-      .reduce((__, key) => {
+  const subscription = Object.keys(nested)
+    .filter(key => 'methods' in nested[key] && key === serviceName)
+    .reduce(
+      (__: any, key: string): GraphQLObjectType | null => {
         const definition = nested[key];
 
         return getGraphQlSubscriptionsFromProtoService({
+          client,
           definition,
           serviceName: key,
-          client,
         });
-      }, null);
+      },
+      null,
+    );
 
-    return new GraphQLSchema({
-      query,
-      types,
-      subscription,
-    });
+  return new GraphQLSchema({
+    query,
+    types,
+    subscription,
   });
 }

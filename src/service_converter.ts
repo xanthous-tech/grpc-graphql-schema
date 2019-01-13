@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 
 import {
-  GraphQLObjectType,
+  GraphQLObjectType, GraphQLFieldConfigMap, Thunk, GraphQLFieldConfig, GraphQLOutputType,
 } from 'graphql';
 
 import { withAsyncIteratorCancel } from './subscription';
@@ -11,7 +11,7 @@ import {
 } from './type_converter';
 
 import {
-  TypeDefinitionCache,
+  typeDefinitionCache,
 } from './types';
 
 export function getGraphqlQueriesFromProtoService({
@@ -20,8 +20,8 @@ export function getGraphqlQueriesFromProtoService({
   client,
 }) {
   const { methods } = definition;
-  const fields = () => Object.keys(methods).reduce(
-    (result, methodName) => {
+  const fields: Thunk<GraphQLFieldConfigMap<any, any>> = () => Object.keys(methods).reduce(
+    (result: GraphQLFieldConfigMap<any, any>, methodName): GraphQLFieldConfigMap<any, any> => {
       const args = {};
       const {
         requestType: requestArgName,
@@ -36,13 +36,13 @@ export function getGraphqlQueriesFromProtoService({
 
       if (!requestArgName.startsWith('Empty')) {
         args[requestArgName] = {
-          type: TypeDefinitionCache[requestArgName],
+          type: typeDefinitionCache[requestArgName],
         };
       }
 
       const queryField = {
-        type: TypeDefinitionCache[responseType],
         args,
+        type: typeDefinitionCache[responseType],
         resolve: async (__, arg) => {
           const response = await client[methodName](
             arg[requestArgName] || {},
@@ -52,32 +52,32 @@ export function getGraphqlQueriesFromProtoService({
                   Date.now() + (Number(process.env.REQUEST_TIMEOUT) || 200000),
             },
           );
-            // FIXME: there is a bug in the graphQL type conversion, I think this is fine for now
+          // FIXME: there is a bug in the graphQL type conversion
           return response;
           // return convertGrpcTypeToGraphqlType(
           //   response,
-          //   TypeDefinitionCache[responseType],
+          //   typeDefinitionCache[responseType],
           // );
         },
       };
 
       // eslint-disable-next-line no-param-reassign
-      result[`${serviceName}${methodName}`] = queryField;
+      result[`${serviceName}${methodName}`] = <GraphQLFieldConfig<any, any>>queryField;
 
       return result;
     },
     {
       // adding a default ping
       ping: {
-        type: TypeDefinitionCache.ServerStatus,
+        type: <GraphQLOutputType>typeDefinitionCache.ServerStatus,
         resolve: () => ({ status: 'online' }),
       },
     },
   );
 
   return new GraphQLObjectType({
-    name: 'Query',
     fields,
+    name: 'Query',
   });
 }
 
@@ -102,12 +102,12 @@ export function getGraphQlSubscriptionsFromProtoService({
 
     if (!requestArgName.startsWith('Empty')) {
       args[requestArgName] = {
-        type: TypeDefinitionCache[requestArgName],
+        type: typeDefinitionCache[requestArgName],
       };
     }
 
     const subscribeField = {
-      type: TypeDefinitionCache[responseType],
+      type: typeDefinitionCache[responseType],
       args,
       subscribe: async (__, arg, { pubsub }) => {
         const response = await client[methodName](
@@ -119,7 +119,7 @@ export function getGraphQlSubscriptionsFromProtoService({
           const payload = {};
           payload[
             `${serviceName}${methodName}`
-          ] = convertGrpcTypeToGraphqlType(data, TypeDefinitionCache[responseType]);
+          ] = convertGrpcTypeToGraphqlType(data, typeDefinitionCache[responseType]);
           pubsub.publish(`${methodName}-onSubscribe`, payload);
         });
 

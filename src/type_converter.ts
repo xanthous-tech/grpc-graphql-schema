@@ -1,15 +1,22 @@
+import * as protobuf from 'protobufjs';
 import * as Long from 'long';
 import {
   GraphQLList,
   GraphQLInputObjectType,
   GraphQLObjectType,
   isListType,
+  Thunk,
 } from 'graphql';
 
 import {
   GRPC_GQL_TYPE_MAPPING,
-  TypeDefinitionCache,
+  typeDefinitionCache,
 } from './types';
+
+interface ProtoDefinitionInput {
+  definition: protobuf.IType;
+  typeName: string;
+}
 
 function convertToGraphqlType(value: any): any {
   if (Long.isLong(value)) {
@@ -20,6 +27,7 @@ function convertToGraphqlType(value: any): any {
   return value;
 }
 
+// TODO: this convert method is not complete
 export function convertGrpcTypeToGraphqlType(payload, typeDef) {
   const fields = typeDef.getFields();
 
@@ -42,22 +50,27 @@ export function convertGrpcTypeToGraphqlType(payload, typeDef) {
 }
 
 export function getGraphqlTypeFromProtoDefinition(
-  { definition, typeName },
+  { definition, typeName }: ProtoDefinitionInput,
 ): GraphQLInputObjectType | GraphQLObjectType {
   const { fields } = definition;
 
-  const fieldsFunction = () => Object.keys(fields).reduce((result, fieldName) => {
-    const { rule, type } = fields[fieldName];
+  // TODO: need to set up for either input type or object type
+  const fieldsFunction = () => Object.keys(fields)
+    .reduce(
+      (result, fieldName) => {
+        const { rule, type } = fields[fieldName];
 
-    const gqlType = GRPC_GQL_TYPE_MAPPING[type] || TypeDefinitionCache[type];
+        const gqlType = GRPC_GQL_TYPE_MAPPING[type] || typeDefinitionCache[type];
 
-    // eslint-disable-next-line no-param-reassign
-    result[fieldName] = {
-      type: rule === 'repeated' ? GraphQLList(gqlType) : gqlType,
-    };
+        // eslint-disable-next-line no-param-reassign
+        result[fieldName] = {
+          type: rule === 'repeated' ? GraphQLList(gqlType) : gqlType,
+        };
 
-    return result;
-  }, {});
+        return result;
+      },
+      {},
+    );
 
   const typeDef = {
     name: typeName,
@@ -69,6 +82,6 @@ export function getGraphqlTypeFromProtoDefinition(
     ? new GraphQLInputObjectType(typeDef)
     : new GraphQLObjectType(typeDef);
 
-  TypeDefinitionCache[typeName] = type;
+  typeDefinitionCache[typeName] = type;
   return type;
 }
