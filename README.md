@@ -12,11 +12,11 @@ Convert gRPC proto Definition into GraphQL Schema
 const { getGraphqlSchemaFromGrpc } = require('grpc-graphql-schema');
 
 getGraphqlSchemaFromGrpc({
-	endpoint: 'localhost:50051',
-	protoFile: 'Service.proto',
-	serviceName: 'GrpcServiceName',
-	packageName: 'name.package',
+  endpoint: 'localhost:50051',
+  protoFile: '/path/to/ServiceDefinition.proto',
+  serviceName: 'GrpcServiceName',
+  packageName: 'name.package',
 }).then(schema => {
-	// load schema in graphql server
+  // load schema in graphql server
 });
 ```
