@@ -1,2 +1,2 @@
 # grpc-graphql-schema
-Convert gRPC proto definition into GraphQL Schema
+Convert gRPC proto Definition into GraphQL Schema
