@@ -55,13 +55,19 @@ class ServerImpl implements IExampleServer {
   }
 
   public searchMoviesByCast(call: grpc.ServerWriteableStream<SearchByCastInput>) {
+    log("call started");
     const input: SearchByCastInput = call.request;
+    let i: number = 1;
     Movies.map(createMovie).forEach((movie: Movie) => {
       if (movie.getCastList().indexOf(input.getCastname()) > -1) {
-        call.write(movie);
+        setTimeout(() => {
+          log(movie.getName());
+          call.write(movie);
+        }, i * 1000);
+        i += 1;
       }
     });
-    call.end();
+    setTimeout(() => call.end(), 5000);
   }
 }
 

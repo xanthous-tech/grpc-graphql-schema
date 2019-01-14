@@ -41,13 +41,19 @@ class ServerImpl {
         callback(null, result);
     }
     searchMoviesByCast(call) {
+        log("call started");
         const input = call.request;
+        let i = 1;
         Movies.map(createMovie).forEach((movie) => {
             if (movie.getCastList().indexOf(input.getCastname()) > -1) {
-                call.write(movie);
+                setTimeout(() => {
+                    log(movie.getName());
+                    call.write(movie);
+                }, i * 1000);
+                i += 1;
             }
         });
-        call.end();
+        setTimeout(() => call.end(), 5000);
     }
 }
 function startServer() {
