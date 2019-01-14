@@ -82,10 +82,10 @@ function startServer() {
   const server = new grpc.Server();
 
   server.addService(ExampleService, new ServerImpl());
-  server.bind("127.0.0.1:50051", grpc.ServerCredentials.createInsecure());
+  server.bind("0.0.0.0:50051", grpc.ServerCredentials.createInsecure());
   server.start();
 
-  log("Server started, listening: 127.0.0.1:50051");
+  log("Server started, listening: 0.0.0.0:50051");
 }
 
 startServer();
