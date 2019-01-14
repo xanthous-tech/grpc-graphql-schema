@@ -129,77 +129,80 @@ export function getGraphQlSubscriptionsFromProtoService({
   client,
 }) {
   const { methods } = definition;
-  const fields = () => Object.keys(methods).reduce((result, methodName) => {
-    const args = {};
-    const {
-      requestType: requestArgName,
-      responseType,
-      responseStream,
-    } = methods[methodName];
+  const fields = () => Object.keys(methods).reduce(
+    (result, methodName) => {
+      const args = {};
+      const {
+        requestType: requestArgName,
+        responseType,
+        responseStream,
+      } = methods[methodName];
 
-    if (!responseStream) {
-      // non-responseStream should be in queries / mutations
-      return result;
-    }
+      if (!responseStream) {
+        // non-responseStream should be in queries / mutations
+        return result;
+      }
 
-    if (!requestArgName.startsWith('Empty')) {
-      args[requestArgName] = {
-        type: typeDefinitionCache[requestArgName],
-      };
-    }
+      if (!requestArgName.startsWith('Empty')) {
+        args[requestArgName] = {
+          type: typeDefinitionCache[requestArgName],
+        };
+      }
 
-    const subscribeField = {
-      args,
-      type: typeDefinitionCache[responseType],
-      subscribe: async (__, arg, { pubsub }) => {
-        const response = await client[methodName](
-          arg[requestArgName] || {},
-          {},
-        );
-
-        response.on('data', (data) => {
-          const payload = {};
-          payload[`${serviceName}${methodName}`] = convertGrpcTypeToGraphqlType(
-            data,
-            typeDefinitionCache[responseType],
+      const subscribeField = {
+        args,
+        type: typeDefinitionCache[responseType],
+        subscribe: async (__, arg, { pubsub }) => {
+          const response = await client[methodName](
+            arg[requestArgName] || {},
+            {},
           );
-          pubsub.publish(`${methodName}-onSubscribe`, payload);
-        });
 
-        response.on('error', (error) => {
-          if (error.code === 1) {
-            // cancelled
-            response.removeAllListeners('error');
+          response.on('data', (data) => {
+            const payload = {};
+            payload[`${serviceName}${methodName}`] = convertGrpcTypeToGraphqlType(
+              data,
+              typeDefinitionCache[responseType],
+            );
+            pubsub.publish(`${methodName}-onSubscribe`, payload);
+          });
+
+          response.on('error', (error) => {
+            if (error.code === 1) {
+              // cancelled
+              response.removeAllListeners('error');
+              response.removeAllListeners();
+            }
+          });
+
+          response.on('end', () => {
             response.removeAllListeners();
-          }
-        });
+          });
 
-        response.on('end', () => {
-          response.removeAllListeners();
-        });
+          const asyncIterator = pubsub.asyncIterator(
+            `${methodName}-onSubscribe`,
+          );
 
-        const asyncIterator = pubsub.asyncIterator(
-          `${methodName}-onSubscribe`,
-        );
+          return withAsyncIteratorCancel(asyncIterator, () => {
+            response.cancel();
+          });
+        },
+      };
 
-        return withAsyncIteratorCancel(asyncIterator, () => {
-          response.cancel();
-        });
-      },
-    };
+      // eslint-disable-next-line no-param-reassign
+      result[`${serviceName}${methodName}`] = subscribeField;
 
-    // eslint-disable-next-line no-param-reassign
-    result[`${serviceName}${methodName}`] = subscribeField;
-
-    return result;
-  }, {});
+      return result;
+    },
+    {},
+  );
 
   if (_.isEmpty(fields())) {
     return null;
   }
 
   return new GraphQLObjectType({
-    name: 'Subscription',
     fields,
+    name: 'Subscription',
   });
 }
