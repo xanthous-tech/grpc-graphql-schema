@@ -44,6 +44,10 @@ class ServerImpl {
         log("call started");
         const input = call.request;
         let i = 1;
+        call.on("error", (error) => {
+            log(error);
+            call.end();
+        });
         Movies.map(createMovie).forEach((movie) => {
             if (movie.getCastList().indexOf(input.getCastname()) > -1) {
                 setTimeout(() => {
@@ -53,7 +57,10 @@ class ServerImpl {
                 i += 1;
             }
         });
-        setTimeout(() => call.end(), 5000);
+        setTimeout(() => {
+            call.end();
+            log("call ended");
+        }, 3000);
     }
 }
 function startServer() {

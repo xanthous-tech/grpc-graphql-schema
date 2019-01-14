@@ -58,6 +58,10 @@ class ServerImpl implements IExampleServer {
     log("call started");
     const input: SearchByCastInput = call.request;
     let i: number = 1;
+    call.on("error", (error) => {
+      log(error);
+      call.end();
+    });
     Movies.map(createMovie).forEach((movie: Movie) => {
       if (movie.getCastList().indexOf(input.getCastname()) > -1) {
         setTimeout(() => {
@@ -67,7 +71,10 @@ class ServerImpl implements IExampleServer {
         i += 1;
       }
     });
-    setTimeout(() => call.end(), 5000);
+    setTimeout(() => {
+      call.end();
+      log("call ended");
+    }, 3000);
   }
 }
 
