@@ -35,7 +35,7 @@ function createMovie(movie) {
     return result;
 }
 class ServerImpl {
-    getMovies(request, callback) {
+    setMovies(request, callback) {
         const result = new Example_pb_1.MoviesResult();
         Movies.map(createMovie).forEach((movie) => result.addResult(movie));
         callback(null, result);
@@ -66,9 +66,9 @@ class ServerImpl {
 function startServer() {
     const server = new grpc.Server();
     server.addService(Example_grpc_pb_1.ExampleService, new ServerImpl());
-    server.bind("127.0.0.1:50051", grpc.ServerCredentials.createInsecure());
+    server.bind("0.0.0.0:50051", grpc.ServerCredentials.createInsecure());
     server.start();
-    log("Server started, listening: 127.0.0.1:50051");
+    log("Server started, listening: 0.0.0.0:50051");
 }
 startServer();
 process.on("uncaughtException", (err) => {

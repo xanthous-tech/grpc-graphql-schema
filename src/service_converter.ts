@@ -14,10 +14,11 @@ import {
   typeDefinitionCache,
 } from './types';
 
-export function getGraphqlQueriesFromProtoService({
+function getGraphqlMethodsFromProtoService({
   definition,
   serviceName,
   client,
+  methodType,
 }) {
   const { methods } = definition;
   const fields: Thunk<GraphQLFieldConfigMap<any, any>> = () => Object.keys(methods).reduce(
@@ -31,6 +32,21 @@ export function getGraphqlQueriesFromProtoService({
 
       if (responseStream) {
         // responseStream should be in subscriptions
+        return result;
+      }
+
+      // filter for queries
+      if (methodType === 'Query' && !methodName.startsWith('Get')) {
+        return result;
+      }
+
+      // filter for mutations
+      if (methodType === 'Mutation' && !methodName.startsWith('Set')) {
+        return result;
+      }
+
+      // filter out ping for mutation
+      if (methodType === 'Mutation' && methodName === 'ping') {
         return result;
       }
 
@@ -77,7 +93,33 @@ export function getGraphqlQueriesFromProtoService({
 
   return new GraphQLObjectType({
     fields,
-    name: 'Query',
+    name: methodType,
+  });
+}
+
+export function getGraphqlQueriesFromProtoService({
+  definition,
+  serviceName,
+  client,
+}) {
+  return getGraphqlMethodsFromProtoService({
+    definition,
+    serviceName,
+    client,
+    methodType: 'Query',
+  });
+}
+
+export function getGraphqlMutationsFromProtoService({
+  definition,
+  serviceName,
+  client,
+}) {
+  return getGraphqlMethodsFromProtoService({
+    definition,
+    serviceName,
+    client,
+    methodType: 'Mutation',
   });
 }
 
@@ -107,8 +149,8 @@ export function getGraphQlSubscriptionsFromProtoService({
     }
 
     const subscribeField = {
-      type: typeDefinitionCache[responseType],
       args,
+      type: typeDefinitionCache[responseType],
       subscribe: async (__, arg, { pubsub }) => {
         const response = await client[methodName](
           arg[requestArgName] || {},
@@ -117,28 +159,23 @@ export function getGraphQlSubscriptionsFromProtoService({
 
         response.on('data', (data) => {
           const payload = {};
-          payload[
-            `${serviceName}${methodName}`
-          ] = convertGrpcTypeToGraphqlType(data, typeDefinitionCache[responseType]);
+          payload[`${serviceName}${methodName}`] = convertGrpcTypeToGraphqlType(
+            data,
+            typeDefinitionCache[responseType],
+          );
           pubsub.publish(`${methodName}-onSubscribe`, payload);
         });
 
         response.on('error', (error) => {
-          // debug(error);
           if (error.code === 1) {
             // cancelled
-            // debug('request cancelled');
             response.removeAllListeners('error');
-            // debug('error handler removed');
             response.removeAllListeners();
-            // debug('all other handlers removed');
           }
         });
 
         response.on('end', () => {
-          // debug('stream ended');
           response.removeAllListeners();
-          // debug('all listeners removed');
         });
 
         const asyncIterator = pubsub.asyncIterator(
@@ -146,9 +183,7 @@ export function getGraphQlSubscriptionsFromProtoService({
         );
 
         return withAsyncIteratorCancel(asyncIterator, () => {
-          // debug('on cancel');
           response.cancel();
-          // debug('on cancel done');
         });
       },
     };

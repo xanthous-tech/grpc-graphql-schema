@@ -50,8 +50,8 @@ function deserialize_io_xtech_example_SearchByCastInput(buffer_arg) {
 
 
 var ExampleService = exports.ExampleService = {
-  getMovies: {
-    path: '/io.xtech.example.Example/GetMovies',
+  setMovies: {
+    path: '/io.xtech.example.Example/SetMovies',
     requestStream: false,
     responseStream: false,
     requestType: Example_pb.EmptyRequest,

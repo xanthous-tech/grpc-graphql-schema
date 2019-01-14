@@ -12,11 +12,13 @@ import { getGraphqlTypeFromProtoDefinition } from './type_converter';
 import {
   getGraphqlQueriesFromProtoService,
   getGraphQlSubscriptionsFromProtoService,
+  getGraphqlMutationsFromProtoService,
 } from './service_converter';
 import { getPackageProtoDefinition } from './protobuf';
 
 export {
   getGraphqlQueriesFromProtoService,
+  getGraphqlMutationsFromProtoService,
   getGraphQlSubscriptionsFromProtoService,
 } from './service_converter';
 
@@ -92,6 +94,21 @@ export async function getGraphqlSchemaFromGrpc({
       null,
     );
 
+  const mutation = Object.keys(nested)
+    .filter((key: string) => 'methods' in nested[key] && key === serviceName)
+    .reduce(
+      (__: any, key: string): GraphQLObjectType | null => {
+        const definition = nested[key];
+
+        return getGraphqlMutationsFromProtoService({
+          client,
+          definition,
+          serviceName: key,
+        });
+      },
+      null,
+    );
+
   const subscription = Object.keys(nested)
     .filter(key => 'methods' in nested[key] && key === serviceName)
     .reduce(
@@ -108,8 +125,9 @@ export async function getGraphqlSchemaFromGrpc({
     );
 
   return new GraphQLSchema({
-    query,
     types,
+    query,
+    mutation,
     subscription,
   });
 }

@@ -4,6 +4,11 @@ export declare function getGraphqlQueriesFromProtoService({ definition, serviceN
     serviceName: any;
     client: any;
 }): GraphQLObjectType;
+export declare function getGraphqlMutationsFromProtoService({ definition, serviceName, client, }: {
+    definition: any;
+    serviceName: any;
+    client: any;
+}): GraphQLObjectType;
 export declare function getGraphQlSubscriptionsFromProtoService({ definition, serviceName, client, }: {
     definition: any;
     serviceName: any;
