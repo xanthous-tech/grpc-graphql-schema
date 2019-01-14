@@ -5,6 +5,9 @@
   "author": "Simon Liang",
   "license": "MIT",
   "private": false,
+  "scripts": {
+    "start": "node ."
+  },
   "dependencies": {
     "graphql-tools": "^4.0.3",
     "graphql-yoga": "^1.16.9",
