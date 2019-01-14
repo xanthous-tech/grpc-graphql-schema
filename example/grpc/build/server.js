@@ -3,65 +3,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const debug = require("debug");
 const grpc = require("grpc");
+const Example_grpc_pb_1 = require("./proto/Example_grpc_pb");
 const log = debug("SampleServer");
 class ServerImpl {
-    getBook(call, callback) {
-        const book = new Book();
-        book.setTitle("DefaultBook");
-        book.setAuthor("DefaultAuthor");
-        log(`[getBook] Done: ${JSON.stringify(book.toObject())}`);
-        callback(null, book);
+    getMovies(request, callback) {
+        callback(new Error(""), null);
     }
-    ;
-    getBooks(call) {
-        call.on("data", (request) => {
-            const reply = new Book();
-            reply.setTitle(`Book${request.getIsbn()}`);
-            reply.setAuthor(`Author${request.getIsbn()}`);
-            reply.setIsbn(request.getIsbn());
-            log(`[getBooks] Write: ${JSON.stringify(reply.toObject())}`);
-            call.write(reply);
-        });
-        call.on("end", () => {
-            log("[getBooks] Done.");
-            call.end();
-        });
-    }
-    ;
-    getBooksViaAuthor(call) {
-        log(`[getBooksViaAuthor] Request: ${JSON.stringify(call.request.toObject())}`);
-        for (let i = 1; i <= 10; i++) {
-            const reply = new Book();
-            reply.setTitle(`Book${i}`);
-            reply.setAuthor(call.request.getAuthor());
-            reply.setIsbn(i);
-            log(`[getBooksViaAuthor] Write: ${JSON.stringify(reply.toObject())}`);
-            call.write(reply);
-        }
-        log("[getBooksViaAuthor] Done.");
+    searchMoviesByCast(call) {
         call.end();
     }
-    ;
-    getGreatestBook(call, callback) {
-        let lastOne;
-        call.on("data", (request) => {
-            log(`[getGreatestBook] Request: ${JSON.stringify(request.toObject())}`);
-            lastOne = request;
-        });
-        call.on("end", () => {
-            const reply = new Book();
-            reply.setIsbn(lastOne.getIsbn());
-            reply.setTitle("LastOne");
-            reply.setAuthor("LastOne");
-            log(`[getGreatestBook] Done: ${JSON.stringify(reply.toObject())}`);
-            callback(null, reply);
-        });
-    }
-    ;
 }
 function startServer() {
     const server = new grpc.Server();
-    server.addService(BookServiceService, new ServerImpl());
+    server.addService(Example_grpc_pb_1.ExampleService, new ServerImpl());
     server.bind("127.0.0.1:50051", grpc.ServerCredentials.createInsecure());
     server.start();
     log("Server started, listening: 127.0.0.1:50051");
