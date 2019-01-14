@@ -1,0 +1,27 @@
+type Movie {
+  name: String
+  year: Int
+  rating: Float
+  cast: [String]
+}
+
+type MoviesResult {
+  result: [Movie]
+}
+
+type Query {
+  ping: ServerStatus
+  ExampleGetMovies: MoviesResult
+}
+
+input SearchByCastInput {
+  castName: String
+}
+
+type ServerStatus {
+  status: String
+}
+
+type Subscription {
+  ExampleSearchMoviesByCast(SearchByCastInput: SearchByCastInput): Movie
+}
