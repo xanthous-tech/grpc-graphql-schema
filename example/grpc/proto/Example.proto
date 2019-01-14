@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package io.xtech.example;
+
+message Movie {
+    string name = 1;
+    int32 year = 2;
+    float rating = 3;
+    repeated string cast = 4;
+}
+
+message EmptyRequest {}
+
+message SearchByCastInput {
+    string castName = 1;
+}
+
+message MoviesResult {
+    repeated Movie result = 1;
+}
+
+service Example {
+    rpc GetMovies (EmptyRequest) returns (MoviesResult) {}
+    rpc SearchMoviesByCast (SearchByCastInput) returns (stream Movie) {}
+}
