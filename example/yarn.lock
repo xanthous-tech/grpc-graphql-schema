@@ -835,10 +835,10 @@ grpc-create-metadata@^3.0.0:
   dependencies:
     lodash.forown "^4.4.0"
 
-grpc-graphql-schema@^0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/grpc-graphql-schema/-/grpc-graphql-schema-0.0.3.tgz#80b7308a267fd047f24db4566c93ee7f2fbf6c1d"
-  integrity sha512-/2NKiYhIOLE/FqD4nTL08NWt81/NwYgaF2vF+mI4rzYzK9w8UPO+kGYpIjA13h9acvR8Fgv/VW7gTmvu3BkDnA==
+grpc-graphql-schema@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/grpc-graphql-schema/-/grpc-graphql-schema-0.0.5.tgz#cc6228550712928eb83834c3ad60038a1f10aff2"
+  integrity sha512-NRqtwlfdErqrlyC4CwSDKdgkoj+fqEoyVy2a/zVJUTe+KTW7+YBpaeiG6eCC4hu02rmrb/bB02VvnHg6NJJjWw==
   dependencies:
     graphql "^14.0.2"
     grpc "^1.17.0"
