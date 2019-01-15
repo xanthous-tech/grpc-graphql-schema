@@ -35,11 +35,6 @@ function getGraphqlMethodsFromProtoService({
         return result;
       }
 
-      // filter for queries
-      if (methodType === 'Query' && !methodName.startsWith('Get')) {
-        return result;
-      }
-
       // filter for mutations
       if (methodType === 'Mutation' && !methodName.startsWith('Set')) {
         return result;
