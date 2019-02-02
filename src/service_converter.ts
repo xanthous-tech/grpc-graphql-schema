@@ -28,6 +28,7 @@ function getGraphqlMethodsFromProtoService({
         requestType: requestArgName,
         responseType,
         responseStream,
+        comment,
       } = methods[methodName];
 
       if (responseStream) {
@@ -54,6 +55,7 @@ function getGraphqlMethodsFromProtoService({
       const queryField = {
         args,
         type: typeDefinitionCache[responseType],
+        description: comment,
         resolve: async (__, arg) => {
           const response = await client[methodName](
             arg[requestArgName] || {},
@@ -77,14 +79,19 @@ function getGraphqlMethodsFromProtoService({
 
       return result;
     },
-    {
+    (methodType === 'Mutation') ? {} : {
       // adding a default ping
       ping: {
         type: <GraphQLOutputType>typeDefinitionCache.ServerStatus,
+        description: 'query for getting server status',
         resolve: () => ({ status: 'online' }),
       },
     },
   );
+
+  if (_.isEmpty(fields())) {
+    return null;
+  }
 
   return new GraphQLObjectType({
     fields,
@@ -131,6 +138,7 @@ export function getGraphQlSubscriptionsFromProtoService({
         requestType: requestArgName,
         responseType,
         responseStream,
+        comment,
       } = methods[methodName];
 
       if (!responseStream) {
@@ -147,6 +155,7 @@ export function getGraphQlSubscriptionsFromProtoService({
       const subscribeField = {
         args,
         type: typeDefinitionCache[responseType],
+        description: comment,
         subscribe: async (__, arg, { pubsub }) => {
           const response = await client[methodName](
             arg[requestArgName] || {},

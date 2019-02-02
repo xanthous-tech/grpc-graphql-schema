@@ -13,8 +13,17 @@ import {
   typeDefinitionCache,
 } from './types';
 
+interface IFieldWithComment extends protobuf.IField {
+  comment?: string | null | undefined;
+}
+
+interface ITypeWithComment extends protobuf.IType {
+  fields: { [k: string]: IFieldWithComment };
+  comment?: string | null | undefined;
+}
+
 interface ProtoDefinitionInput {
-  definition: protobuf.IType;
+  definition: ITypeWithComment;
   typeName: string;
 }
 
@@ -52,19 +61,20 @@ export function convertGrpcTypeToGraphqlType(payload, typeDef) {
 export function getGraphqlTypeFromProtoDefinition(
   { definition, typeName }: ProtoDefinitionInput,
 ): GraphQLInputObjectType | GraphQLObjectType {
-  const { fields } = definition;
+  const { fields, comment } = definition;
 
   // TODO: need to set up for either input type or object type
   const fieldsFunction = () => Object.keys(fields)
     .reduce(
       (result, fieldName) => {
-        const { rule, type } = fields[fieldName];
+        const { rule, type, comment } = fields[fieldName];
 
         const gqlType = GRPC_GQL_TYPE_MAPPING[type] || typeDefinitionCache[type];
 
         // eslint-disable-next-line no-param-reassign
         result[fieldName] = {
           type: rule === 'repeated' ? GraphQLList(gqlType) : gqlType,
+          description: comment,
         };
 
         return result;
@@ -75,6 +85,7 @@ export function getGraphqlTypeFromProtoDefinition(
   const typeDef = {
     name: typeName,
     fields: fieldsFunction,
+    description: comment,
   };
 
   // CONVENTION - types that end with `Input` are GraphQL input types

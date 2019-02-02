@@ -18,6 +18,9 @@
     "tslint-config-airbnb": "^5.11.1",
     "typescript": "^3.2.2"
   },
+  "peerDependencies": {
+    "graphql": "^14.0.2"
+  },
   "dependencies": {
     "graphql": "^14.0.2",
     "grpc": "^1.17.0",
