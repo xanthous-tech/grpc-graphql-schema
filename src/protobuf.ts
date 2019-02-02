@@ -9,7 +9,6 @@ export async function getPackageProtoDefinition(
   const protoDefinitionObject = await protoDefinition.toJSON({
     keepComments: true,
   });
-  console.log(JSON.stringify(protoDefinitionObject, null, 2));
   const packagePaths: string[] = packageName.split('.');
 
   for (let i: number = 0; i < packagePaths.length; i += 2) {
