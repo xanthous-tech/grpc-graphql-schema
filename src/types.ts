@@ -30,9 +30,11 @@ export const GRPC_GQL_TYPE_MAPPING: TypeMapping = {
 export const typeDefinitionCache: TypeMapping = {
   ServerStatus: new GraphQLObjectType({
     name: 'ServerStatus',
+    description: 'status of the server',
     fields: () => ({
       status: {
         type: GraphQLString,
+        descripton: 'status string',
       },
     }),
   }),
