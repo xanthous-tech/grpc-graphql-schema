@@ -1,6 +1,6 @@
 {
   "name": "grpc-graphql-schema",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Convert gRPC proto Definition into GraphQL Schema",
   "main": "lib/index.js",
   "repository": "https://github.com/xanthous-tech/grpc-graphql-schema",
