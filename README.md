@@ -13,7 +13,7 @@ const { getGraphqlSchemaFromGrpc } = require('grpc-graphql-schema');
 
 getGraphqlSchemaFromGrpc({
   endpoint: 'localhost:50051',
-  protoFile: '/path/to/ServiceDefinition.proto',
+  protoFilePath: '/path/to/ServiceDefinition.proto',
   serviceName: 'GrpcServiceName',
   packageName: 'name.package',
 }).then(schema => {
