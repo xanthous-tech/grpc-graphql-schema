@@ -4,6 +4,7 @@ import {
   GraphQLInt,
   GraphQLFloat,
   GraphQLString,
+  GraphQLBoolean,
 } from 'graphql';
 
 export interface GrpcGraphqlSchemaConfiguration {
@@ -25,6 +26,7 @@ export const GRPC_GQL_TYPE_MAPPING: TypeMapping = {
   float: GraphQLFloat,
   double: GraphQLFloat,
   string: GraphQLString,
+  bool: GraphQLBoolean,
 };
 
 export const typeDefinitionCache: TypeMapping = {
