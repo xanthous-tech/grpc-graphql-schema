@@ -6,6 +6,10 @@
 
 Convert gRPC proto Definition into GraphQL Schema
 
+[Slides @ GraphQL BKK 4.0](https://docs.google.com/presentation/d/11sw3yK7p6xYcES9Wsjco7z3lGgmYlefnNrqhZ6vaYvA/edit?usp=sharing)
+
+[Medium Article](https://medium.com/xanthous/translating-grpc-services-into-graphql-6a8e49556d96)
+
 # How to Use
 
 ```javascript
