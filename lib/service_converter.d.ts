@@ -3,14 +3,20 @@ export declare function getGraphqlQueriesFromProtoService({ definition, serviceN
     definition: any;
     serviceName: any;
     client: any;
-}): GraphQLObjectType;
+}): GraphQLObjectType<any, any, {
+    [key: string]: any;
+}>;
 export declare function getGraphqlMutationsFromProtoService({ definition, serviceName, client, }: {
     definition: any;
     serviceName: any;
     client: any;
-}): GraphQLObjectType;
+}): GraphQLObjectType<any, any, {
+    [key: string]: any;
+}>;
 export declare function getGraphQlSubscriptionsFromProtoService({ definition, serviceName, client, }: {
     definition: any;
     serviceName: any;
     client: any;
-}): GraphQLObjectType;
+}): GraphQLObjectType<any, any, {
+    [key: string]: any;
+}>;

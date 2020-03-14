@@ -35,7 +35,7 @@ function createMovie(movie) {
     return result;
 }
 class ServerImpl {
-    setMovies(request, callback) {
+    getMovies(request, callback) {
         const result = new Example_pb_1.MoviesResult();
         Movies.map(createMovie).forEach((movie) => result.addResult(movie));
         callback(null, result);

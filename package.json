@@ -1,6 +1,6 @@
 {
   "name": "grpc-graphql-schema",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "Convert gRPC proto Definition into GraphQL Schema",
   "main": "lib/index.js",
   "repository": "https://github.com/xanthous-tech/grpc-graphql-schema",
@@ -8,25 +8,27 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "build": "tsc --project .",
+    "build": "tsc",
     "start": "node ."
   },
   "devDependencies": {
-    "@types/graphql": "^14.0.4",
-    "@types/node": "^10.12.18",
-    "tslint": "^5.12.1",
-    "tslint-config-airbnb": "^5.11.1",
-    "typescript": "^3.2.2"
+    "@types/graphql": "^14.5.0",
+    "@types/node": "^13.9.1",
+    "graphql": "^14.6.0",
+    "typescript": "^3.8.3"
   },
   "peerDependencies": {
-    "graphql": "^14.0.2"
+    "graphql": "^14.6.0"
   },
   "dependencies": {
-    "graphql": "^14.0.2",
-    "grpc": "^1.17.0",
-    "grpc-caller": "^0.11.0",
-    "lodash": "^4.17.11",
+    "grpc": "^1.24.2",
+    "grpc-caller": "^0.13.0",
+    "lodash": "^4.17.15",
     "long": "^4.0.0",
-    "protobufjs": "^6.8.8"
+    "protobufjs": "^6.8.9"
+  },
+  "volta": {
+    "node": "12.16.1",
+    "yarn": "1.21.1"
   }
 }

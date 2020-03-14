@@ -16,15 +16,19 @@
   "license": "ISC",
   "dependencies": {
     "debug": "^4.1.1",
-    "google-protobuf": "^3.6.1",
-    "grpc": "^1.17.0"
+    "google-protobuf": "^3.11.4",
+    "grpc": "^1.24.2"
   },
   "devDependencies": {
     "@types/debug": "^0.0.31",
-    "@types/google-protobuf": "^3.2.7",
-    "@types/node": "^10.12.18",
-    "grpc-tools": "^1.6.6",
-    "grpc_tools_node_protoc_ts": "^2.4.2",
-    "typescript": "^3.2.2"
+    "@types/google-protobuf": "^3.7.2",
+    "@types/node": "^13.9.1",
+    "grpc-tools": "^1.8.1",
+    "grpc_tools_node_protoc_ts": "^2.5.10",
+    "typescript": "^3.8.3"
+  },
+  "volta": {
+    "node": "12.16.1",
+    "yarn": "1.21.1"
   }
 }
