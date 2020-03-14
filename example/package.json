@@ -9,9 +9,15 @@
     "start": "node ."
   },
   "dependencies": {
-    "graphql": "^14.0.2",
-    "graphql-tools": "^4.0.3",
-    "graphql-yoga": "^1.16.9",
-    "grpc-graphql-schema": "^0.0.7"
+    "graphql": "^14.6.0",
+    "graphql-tools": "^4.0.7",
+    "graphql-yoga": "^1.18.3",
+    "grpc-graphql-schema": "file:.."
+  },
+  "resolutions": {
+    "graphql": "14.6.0",
+    "grpc-graphql-schema/graphql": "14.6.0",
+    "graphql-tools/**/graphql": "14.6.0",
+    "graphql-yoga/**/graphql": "14.6.0"
   }
 }
